@@ -589,17 +589,17 @@
     <div class="container">
         <div class="header">
             <h1 class="main-title">Playlist Builder</h1>
-            <p class="main-subtitle">Combina multiple playlist IPTV generando un link unificato per l'endpoint /playlist</p>
+            <p class="main-subtitle">Combine multiple IPTV playlists by generating a unified link for the endpoint. /playlist</p>
         </div>
 
         <div class="features-section">
             <div class="features-grid">
-                <div class="feature-badge">🔗 Link unificato /playlist</div>
-                <div class="feature-badge">🔧 Separazione automatica con ;</div>
-                <div class="feature-badge">📺 Formato compatibile con server</div>
-                <div class="feature-badge">🎯 Generazione istantanea</div>
-                <div class="feature-badge">🌐 Supporto URL multipli</div>
-                <div class="feature-badge">📋 Copia con un click</div>
+                <div class="feature-badge">🔗 Unified link /playlist</div>  
+                <div class="feature-badge">🔧 Automatic separation with ;</div>  
+                <div class="feature-badge">📺 Server-compatible format</div>  
+                <div class="feature-badge">🎯 Instant generation</div>  
+                <div class="feature-badge">🌐 Multiple URL support</div>  
+                <div class="feature-badge">📋 One-click copy</div>
             </div>
         </div>
 
@@ -607,7 +607,7 @@
             <div class="left-panel">
                 <h2 class="section-title">
                     <span class="section-icon">📝</span>
-                    Configurazione Playlist
+                    Configure Playlist
                 </h2>
 
                 <form id="playlistForm">
@@ -629,12 +629,12 @@
                 </form>
 
                 <div class="form-group">
-                    <label class="form-label">Playlist Aggiunte</label>
+                    <label class="form-label">Added Playlists</label>
                     <div id="playlistList">
                         <div class="output-placeholder">
                             <div class="output-placeholder-icon">📋</div>
-                            <p>Nessuna playlist aggiunta</p>
-                            <small>Inserisci gli URL delle playlist e clicca ➕ per aggiungerli</small>
+                            <p>No playlist added</p>
+                            <small>Enter the playlist URLs and click ➕ to add them</small>
                         </div>
                     </div>
                 </div>
@@ -642,11 +642,11 @@
                 <div class="form-group">
                     <button id="generateBtn" class="btn btn-success" disabled>
                         <span>🚀</span>
-                        <span>Genera Link</span>
+                        <span>Generate Link</span>
                     </button>
                     <button id="clearBtn" class="btn btn-secondary">
                         <span>🗑️</span>
-                        <span>Pulisci Lista</span>
+                        <span>Clear List</span>
                     </button>
                 </div>
             </div>
@@ -655,7 +655,7 @@
                 <div class="output-section">
                     <h2 class="section-title">
                         <span class="section-icon">🔗</span>
-                        Link Generato
+                        Generated Link
                         <button id="copyBtn" class="btn btn-secondary btn-icon-only" style="margin-left: auto;" disabled>
                             📋
                         </button>
@@ -666,8 +666,8 @@
                     <div class="output-content" id="outputContent">
                         <div class="output-placeholder">
                             <div class="output-placeholder-icon">🔗</div>
-                            <p>Il link combinato apparirà qui</p>
-                            <small>Inserisci gli URL delle playlist e clicca "Genera Link" per creare il link unificato</small>
+                            <p>The combined link will appear here</p>
+                            <small>Enter the playlist URLs and click “Generate Link” to create the unified link</small>
                         </div>
                     </div>
                 </div>
@@ -676,7 +676,7 @@
     </div>
 
     <div class="copy-notification" id="copyNotification">
-        ✅ Link copiato negli appunti!
+        ✅ Link copied to clipboard!
     </div>
 
     <script>
@@ -717,12 +717,12 @@
                 if (!url) return;
 
                 if (!this.isValidUrl(url)) {
-                    this.showNotification('❌ URL non valido', 'error');
+                    this.showNotification('❌ URL not valid', 'error');
                     return;
                 }
 
                 if (this.playlists.includes(url)) {
-                    this.showNotification('⚠️ URL già presente nella lista', 'warning');
+                    this.showNotification('⚠️ URL already present in the list', 'warning');
                     return;
                 }
 
@@ -753,7 +753,7 @@
                         <div class="output-placeholder">
                             <div class="output-placeholder-icon">📋</div>
                             <p>Nessuna playlist aggiunta</p>
-                            <small>Inserisci gli URL delle playlist e clicca ➕ per aggiungerli</small>
+                            <small>Enter the playlist URLs and click ➕ to add them</small>
                         </div>
                     `;
                     return;
@@ -794,9 +794,9 @@
                     this.displayResult(generatedLink);
                     this.copyBtn.disabled = false;
 
-                    this.showNotification('✅ Link generato con successo!', 'success');
+                    this.showNotification('✅ Link generated successfully!', 'success');
                 } catch (error) {
-                    this.showError('Errore durante la generazione del link: ' + error.message);
+                    this.showError('Error while generating the link:' + error.message);
                 } finally {
                     this.setLoading(false);
                     this.generateBtn.disabled = false;
@@ -823,7 +823,7 @@
 
                 this.outputContent.innerHTML = `
                     <div class="fade-in">
-                        <div class="link-label">Link Generato</div>
+                        <div class="link-label">Generate Link</div>
                         <div class="generated-link">
                             <div class="link-text">${link}</div>
                         </div>
@@ -834,7 +834,7 @@
             setLoading(loading) {
                 this.loadingSpinner.style.display = loading ? 'block' : 'none';
                 if (loading) {
-                    this.outputContent.innerHTML = '<div class="output-placeholder"><div class="output-placeholder-icon">⏳</div><p>Generazione link in corso...</p></div>';
+                    this.outputContent.innerHTML = '<div class="output-placeholder"><div class="output-placeholder-icon">⏳</div><p>Generating link in progress…</p></div>';
                 }
             }
 
@@ -873,7 +873,7 @@
                     document.execCommand('copy');
                     this.showCopyNotification();
                 } catch (err) {
-                    this.showNotification('❌ Impossibile copiare negli appunti', 'error');
+                    this.showNotification('❌ Unable to copy to clipboard', 'error');
                 }
 
                 document.body.removeChild(textArea);
@@ -891,15 +891,15 @@
                 this.updatePlaylistList();
                 this.updateGenerateButton();
                 this.resetOutput();
-                this.showNotification('🗑️ Lista playlist pulita', 'info');
+                this.showNotification('🗑️ Playlist list cleared', 'info');
             }
 
             resetOutput() {
                 this.outputContent.innerHTML = `
                     <div class="output-placeholder">
                         <div class="output-placeholder-icon">🔗</div>
-                        <p>Il link combinato apparirà qui</p>
-                        <small>Inserisci gli URL delle playlist e clicca "Genera Link" per creare il link unificato</small>
+                        <p>The combined link will appear here</p>
+                        <small>Enter the playlist URLs and click “Generate Link” to create the unified link</small>
                     </div>
                 `;
                 this.copyBtn.disabled = true;
@@ -909,7 +909,7 @@
                 this.outputContent.innerHTML = `
                     <div class="output-placeholder">
                         <div class="output-placeholder-icon">❌</div>
-                        <p>Errore</p>
+                        <p>Error</p>
                         <small>${message}</small>
                     </div>
                 `;
