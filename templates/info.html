@@ -648,7 +648,7 @@
             <h1 class="main-title">HLS Proxy Server</h1>
             <div class="status-banner">
                 <div class="status-indicator"></div>
-                <span>Server Operativo</span>
+                <span>Server Operational</span>
             </div>
         </div>
 
@@ -668,11 +668,11 @@
         </nav>
 
         <div class="content-grid">
-            <!-- Endpoint Principali -->
+            <!-- Main Endpoints -->
             <section id="endpoints" class="section-card">
                 <h2 class="section-title">
                     <div class="section-icon">🔄</div>
-                    Endpoint Principali
+                    Main Endpoints
                 </h2>
 
                 <div class="endpoint-card">
@@ -681,15 +681,15 @@
                         <code class="endpoint-path">/proxy/manifest.m3u8?url=&lt;STREAM_URL&gt;</code>
                     </div>
                     <p class="endpoint-description">
-                        Proxy universale per streaming multimediale con supporto completo per diversi formati e protocolli.
+                        Universal proxy for media streaming with full support for various formats and protocols.
                     </p>
-                    <div class="code-block">Supporta:
-• VixSrc - Streaming VOD
-• Sportzonline - Streaming sportivo
-• HLS (.m3u8) - Streaming live e VOD
-• M3U playlist - Liste canali IPTV  
-• MPD (DASH) - Streaming adattivo
-• DLHD streams - Flussi dinamici</div>
+                    <div class="code-block">Supports:
+• VixSrc - VOD streaming  
+• Sportzonline - Sports streaming  
+• HLS (.m3u8) - Live and VOD streaming  
+• M3U playlists - IPTV channel lists  
+• MPD (DASH) - Adaptive streaming  
+• DLHD streams - Dynamic streams</div>
                     <div class="example-block">/proxy/manifest.m3u8?url=https://vixsrc.to/movie/...</div>
                 </div>
 
@@ -699,20 +699,20 @@
                         <code class="endpoint-path">/proxy/manifest.m3u8?url=&lt;URL_VAVOO&gt;</code>
                     </div>
                     <p class="endpoint-description">
-                        Estrazione automatica di contenuti Vavoo con risoluzione diretta degli stream.
+                        Automatic extraction of Vavoo content with direct stream resolution.
                     </p>
                     <ul class="feature-list">
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Link vavoo.to in stream diretti</span>
+                            <span>Convert vavoo.to links into direct streams</span>
                         </li>
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Autenticazione API automatica</span>
+                            <span>Automatic API authentication</span>
                         </li>
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Headers ottimizzati per streaming</span>
+                            <span>Optimized headers for streaming</span>
                         </li>
                     </ul>
                 </div>
@@ -723,20 +723,20 @@
                         <code class="endpoint-path">/proxy/manifest.m3u8?url=&lt;URL_DADDYLIVE&gt;</code>
                     </div>
                     <p class="endpoint-description">
-                        Risoluzione avanzata per contenuti DaddyLive HD con bypass automatico delle restrizioni.
+                        Advanced resolution for DaddyLive HD content with automatic restriction bypass.
                     </p>
                     <ul class="feature-list">
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Risoluzione link DaddyLive HD</span>
+                            <span>Resolve DaddyLive HD links</span>
                         </li>
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Bypass automatico restrizioni</span>
+                            <span>Automatic restriction bypass</span>
                         </li>
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Ottimizzazione qualità stream</span>
+                            <span>Stream quality optimization</span>
                         </li>
                     </ul>
                 </div>
@@ -746,65 +746,41 @@
                         <code class="endpoint-path">/proxy/manifest.m3u8?url=&lt;URL_SPORTSONLINE&gt;</code>
                     </div>
                     <p class="endpoint-description">
-                        Risoluzione automatica di stream da Sportsonline/Sportzonline.
+                        Automatic resolution of streams from Sportsonline/Sportzonline.
                     </p>
                     <ul class="feature-list">
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Estrazione automatica di iframe e URL M3U8</span>
+                            <span>Automatic extraction of iframes and M3U8 URLs</span>
                         </li>
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Supporto a P.A.C.K.E.R. unpacking</span>
+                            <span>Support for P.A.C.K.E.R. unpacking</span>
                         </li>
                         <li class="feature-item">
                             <span class="feature-bullet">•</span>
-                            <span>Headers ottimizzati per lo streaming</span>
+                            <span>Optimized headers for streaming</span>
                         </li>
                     </ul>
                 </div>
             </section>
 
-            <!-- Caratteristiche Avanzate -->
+            <!-- Advanced Features -->
             <section class="section-card">
                 <h2 class="section-title">
                     <div class="section-icon">⚡</div>
-                    Caratteristiche Avanzate
+                    Advanced Features
                 </h2>
 
                 <div class="feature-list">
-                    <li class="feature-item">
-                        <span class="feature-bullet">🔐</span>
-                        <span>Gestione automatica AES-128 per chiavi crittografiche</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">📋</span>
-                        <span>Supporto completo #EXTVLCOPT e #EXTHTTP</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">🔄</span>
-                        <span>Retry automatico con exponential backoff</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">⚡</span>
-                        <span>Connection pooling per prestazioni ottimali</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">🌐</span>
-                        <span>Headers personalizzati con prefisso h_</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">📺</span>
-                        <span>Proxy trasparente per segmenti .ts</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">🎯</span>
-                        <span>Compatibilità universale player IPTV</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">🛡️</span>
-                        <span>Sessioni persistenti anti-bot</span>
-                    </li>
+                    <li class="feature-item"><span class="feature-bullet">🔐</span> <span>Automatic AES-128 key management</span></li>
+                    <li class="feature-item"><span class="feature-bullet">📋</span> <span>Full #EXTVLCOPT and #EXTHTTP support</span></li>
+                    <li class="feature-item"><span class="feature-bullet">🔄</span> <span>Automatic retry with exponential backoff</span></li>
+                    <li class="feature-item"><span class="feature-bullet">⚡</span> <span>Connection pooling for optimal performance</span></li>
+                    <li class="feature-item"><span class="feature-bullet">🌐</span> <span>Custom headers with h_ prefix</span></li>
+                    <li class="feature-item"><span class="feature-bullet">📺</span> <span>Transparent proxy for .ts segments</span></li>
+                    <li class="feature-item"><span class="feature-bullet">🎯</span> <span>Universal IPTV player compatibility</span></li>
+                    <li class="feature-item"><span class="feature-bullet">🛡️</span> <span>Persistent anti-bot sessions</span></li>
                 </div>
 
                 <div style="margin-top: var(--spacing-lg);">
@@ -818,40 +794,40 @@
                 </div>
             </section>
 
-            <!-- Headers Personalizzati -->
+            <!-- Custom Headers -->
             <section class="section-card">
                 <h2 class="section-title">
                     <div class="section-icon">🔧</div>
-                    Headers Personalizzati
+                    Custom Headers
                 </h2>
 
                 <p class="endpoint-description">
-                    Aggiungi headers custom con prefisso <code style="color: var(--text-code); background: var(--surface-code); padding: 2px 6px; border-radius: 4px;">h_</code>:
+                    Add custom headers using the prefix <code style="color: var(--text-code); background: var(--surface-code); padding: 2px 6px; border-radius: 4px;">h_</code>:
                 </p>
 
                 <div class="code-block">?url=STREAM_URL&h_user-agent=CustomUA&h_referer=https://site.com&h_authorization=Bearer token123</div>
 
-                <h3 style="color: var(--text-primary); margin: var(--spacing-lg) 0 var(--spacing-md) 0; font-size: 1.1rem;">Headers supportati:</h3>
+                <h3 style="color: var(--text-primary); margin: var(--spacing-lg) 0 var(--spacing-md) 0; font-size: 1.1rem;">Supported headers:</h3>
                 <ul class="feature-list">
                     <li class="feature-item">
                         <span class="feature-bullet">•</span>
-                        <span><strong>h_user-agent</strong> - User Agent personalizzato</span>
+                        <span><strong>h_user-agent</strong> - Custom User Agent</span>
                     </li>
                     <li class="feature-item">
                         <span class="feature-bullet">•</span>
-                        <span><strong>h_referer</strong> - Sito di riferimento</span>
+                        <span><strong>h_referer</strong> - Referring site</span>
                     </li>
                     <li class="feature-item">
                         <span class="feature-bullet">•</span>
-                        <span><strong>h_authorization</strong> - Token di autorizzazione</span>
+                        <span><strong>h_authorization</strong> - Authorization token</span>
                     </li>
                     <li class="feature-item">
                         <span class="feature-bullet">•</span>
-                        <span><strong>h_origin</strong> - Dominio origine</span>
+                        <span><strong>h_origin</strong> - Origin domain</span>
                     </li>
                     <li class="feature-item">
                         <span class="feature-bullet">•</span>
-                        <span><strong>h_*</strong> - Qualsiasi header personalizzato</span>
+                        <span><strong>h_*</strong> - Any custom header</span>
                     </li>
                 </ul>
             </section>
@@ -864,7 +840,7 @@
                 </h2>
 
                 <p class="endpoint-description">
-                    Combina multiple playlist in un unico stream M3U:
+                    Combine multiple playlists into a single M3U stream:
                 </p>
 
                 <div class="endpoint-card" style="margin: var(--spacing-lg) 0;">
@@ -875,103 +851,52 @@
                 </div>
 
                 <p class="endpoint-description">
-                    Interfaccia completa per:
+                    Full interface for:
                 </p>
 
                 <ul class="feature-list">
-                    <li class="feature-item">
-                        <span class="feature-bullet">✅</span>
-                        <span>Combinare playlist multiple</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">✅</span>
-                        <span>Gestione automatica Vavoo e DLHD</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">✅</span>
-                        <span>Proxy automatico per tutti gli stream</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">✅</span>
-                        <span>Compatibilità VLC, Kodi, IPTV players</span>
-                    </li>
+                    <li class="feature-item"><span class="feature-bullet">✅</span> <span>Combining multiple playlists</span></li>
+                    <li class="feature-item"><span class="feature-bullet">✅</span> <span>Automatic Vavoo and DLHD handling</span></li>
+                    <li class="feature-item"><span class="feature-bullet">✅</span> <span>Automatic proxying for all streams</span></li>
+                    <li class="feature-item"><span class="feature-bullet">✅</span> <span>Compatibility with VLC, Kodi, IPTV players</span></li>
                 </ul>
 
-                <div class="example-block">Formato output: M3U8 con proxy integrato</div>
+                <div class="example-block">Output format: M3U8 with integrated proxy</div>
             </section>
 
-            <!-- Compatibilità Player -->
+            <!-- Player Compatibility -->
             <section class="section-card">
                 <h2 class="section-title">
                     <div class="section-icon">📱</div>
-                    Compatibilità Player
+                    Player Compatibility
                 </h2>
 
                 <div class="architecture-grid">
-                    <div class="arch-card">
-                        <div class="arch-icon">🎬</div>
-                        <div class="arch-title">VLC Media Player</div>
-                        <div class="arch-description">Tutte le versioni supportate</div>
-                    </div>
-                    <div class="arch-card">
-                        <div class="arch-icon">🎯</div>
-                        <div class="arch-title">Kodi</div>
-                        <div class="arch-description">Con plugin IPTV</div>
-                    </div>
-                    <div class="arch-card">
-                        <div class="arch-icon">📺</div>
-                        <div class="arch-title">IPTV Smarters Pro</div>
-                        <div class="arch-description">Supporto nativo</div>
-                    </div>
-                    <div class="arch-card">
-                        <div class="arch-icon">⚡</div>
-                        <div class="arch-title">TiviMate</div>
-                        <div class="arch-description">IPTV Player avanzato</div>
-                    </div>
-                    <div class="arch-card">
-                        <div class="arch-icon">🎮</div>
-                        <div class="arch-title">Perfect Player</div>
-                        <div class="arch-description">IPTV completo</div>
-                    </div>
-                    <div class="arch-card">
-                        <div class="arch-icon">🌐</div>
-                        <div class="arch-title">Browser Web</div>
-                        <div class="arch-description">Moderni HTML5</div>
-                    </div>
+                    <div class="arch-card"><div class="arch-icon">🎬</div><div class="arch-title">VLC Media Player</div><div class="arch-description">All versions supported</div></div>
+                    <div class="arch-card"><div class="arch-icon">🎯</div><div class="arch-title">Kodi</div><div class="arch-description">With IPTV plugin</div></div>
+                    <div class="arch-card"><div class="arch-icon">📺</div><div class="arch-title">IPTV Smarters Pro</div><div class="arch-description">Native support</div></div>
+                    <div class="arch-card"><div class="arch-icon">⚡</div><div class="arch-title">TiviMate</div><div class="arch-description">Advanced IPTV Player</div></div>
+                    <div class="arch-card"><div class="arch-icon">🎮</div><div class="arch-title">Perfect Player</div><div class="arch-description">Complete IPTV player</div></div>
+                    <div class="arch-card"><div class="arch-icon">🌐</div><div class="arch-title">Web Browser</div><div class="arch-description">Modern HTML5 browsers</div></div>
                 </div>
             </section>
 
-            <!-- Architettura Sistema -->
+            <!-- System Architecture -->
             <section id="architecture" class="section-card">
                 <h2 class="section-title">
                     <div class="section-icon">⚙️</div>
-                    Architettura Sistema
+                    System Architecture
                 </h2>
 
                 <h3 style="color: var(--text-primary); margin: 0 0 var(--spacing-md) 0; display: flex; align-items: center; gap: var(--spacing-sm);">
-                    <span>🏗️</span> Stack Tecnologico:
+                    <span>🏗️</span> Technology Stack:
                 </h3>
                 <ul class="feature-list" style="margin-bottom: var(--spacing-xl);">
-                    <li class="feature-item">
-                        <span class="feature-bullet">•</span>
-                        <span>Python 3.11+ (FastAPI/aiohttp)</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">•</span>
-                        <span>Server ASGI asincrono (Uvicorn)</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">•</span>
-                        <span>Connection pooling HTTP/2</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">•</span>
-                        <span>Gestione sessioni persistenti</span>
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-bullet">•</span>
-                        <span>Anti-bot detection bypass</span>
-                    </li>
+                    <li class="feature-item">Python 3.11+ (FastAPI/aiohttp)</li>
+                    <li class="feature-item">Asynchronous ASGI Server (Uvicorn)</li>
+                    <li class="feature-item">HTTP/2 Connection pooling</li>
+                    <li class="feature-item">Persistent session management</li>
+                    <li class="feature-item">Anti-bot detection bypass</li>
                 </ul>
 
                 <h3 style="color: var(--text-primary); margin: 0 0 var(--spacing-md) 0; display: flex; align-items: center; gap: var(--spacing-sm);">
@@ -979,28 +904,16 @@
                 </h3>
 
                 <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-value">&lt; 50ms</div>
-                        <div class="metric-label">Latenza Overhead</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">1000+</div>
-                        <div class="metric-label">Connessioni Simultanee</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">50-200MB</div>
-                        <div class="metric-label">Memoria Tipica</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">∞</div>
-                        <div class="metric-label">Throughput</div>
-                    </div>
+                    <div class="metric-card"><div class="metric-value">&lt; 50ms</div><div class="metric-label">Latency Overhead</div></div>
+                    <div class="metric-card"><div class="metric-value">1000+</div><div class="metric-label">Simultaneous Connections</div></div>
+                    <div class="metric-card"><div class="metric-value">50–200MB</div><div class="metric-label">Typical Memory</div></div>
+                    <div class="metric-card"><div class="metric-value">∞</div><div class="metric-label">Throughput</div></div>
                 </div>
 
                 <ul class="feature-list" style="margin-top: var(--spacing-lg);">
                     <li class="feature-item">
                         <span class="feature-bullet">•</span>
-                        <span>DNS caching integrato</span>
+                        <span>Integrated DNS caching</span>
                     </li>
                 </ul>
             </section>
@@ -1008,7 +921,7 @@
     </div>
 
     <script>
-        // Smooth scrolling per i link interni
+        // Smooth scrolling for internal links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1022,7 +935,7 @@
             });
         });
 
-        // Effetti di hover avanzati per le card
+        // Advanced hover effects for cards
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.section-card, .endpoint-card, .arch-card, .metric-card');
 
@@ -1036,7 +949,7 @@
                 });
             });
 
-            // Animazione della status banner al click
+           // Status banner animation on click
             const statusBanner = document.querySelector('.status-banner');
             statusBanner.addEventListener('click', () => {
                 statusBanner.style.animation = 'none';
@@ -1048,7 +961,7 @@
                 }, 600);
             });
 
-            // Effetto parallax leggero per il background
+            // Subtle parallax background effect
             let ticking = false;
 
             function updateParallax() {
@@ -1067,7 +980,7 @@
 
             window.addEventListener('scroll', requestTick);
 
-            // Intersection Observer per animazioni di entrata
+            // Intersection Observer for entry animations
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -1082,7 +995,7 @@
                 });
             }, observerOptions);
 
-            // Osserva tutte le section-card
+            // Observe all the section-cards
             document.querySelectorAll('.section-card').forEach(card => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(30px)';
