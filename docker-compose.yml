@@ -1,6 +1,6 @@
 services:  
   EasyProxy:
-    build: https://github.com/nzo66/EasyProxy.git#main
+    build: https://github.com/domainus/EasyProxy-English.git#main
     container_name: EasyProxy
     restart: unless-stopped
     ports:

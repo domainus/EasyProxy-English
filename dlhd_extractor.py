@@ -21,7 +21,7 @@ class ExtractorError(Exception):
     pass
 
 class DLHDExtractor:
-    """DLHD Extractor con sessione persistente e gestione anti-bot avanzata"""
+    """DLHD Extractor with persistent session and advanced anti-bot handling"""
 
     def __init__(self, request_headers: dict, proxies: list = None):
         self.request_headers = request_headers
@@ -35,23 +35,23 @@ class DLHDExtractor:
         self._iframe_context = None
         self._session_lock = asyncio.Lock()
         self.proxies = proxies or []
-        self._extraction_locks: Dict[str, asyncio.Lock] = {} # ✅ NUOVO: Lock per evitare estrazioni multiple
+        self._extraction_locks: Dict[str, asyncio.Lock] = {} # ✅ NEW: Lock to prevent multiple extractions
         self.cache_file = os.path.join(os.path.dirname(__file__), '.dlhd_cache')
         self._stream_data_cache: Dict[str, Dict[str, Any]] = self._load_cache()
 
     def _load_cache(self) -> Dict[str, Dict[str, Any]]:
-        """Carica la cache da un file codificato in Base64 all'avvio."""
+        """Loads the cache from a Base64-encoded file at startup."""
         try:
             if os.path.exists(self.cache_file):
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
-                    logger.info(f"💾 Caricamento cache dal file: {self.cache_file}")
+                    logger.info(f"💾 Loading cache from file: {self.cache_file}")
                     encoded_data = f.read()
                     if not encoded_data:
                         return {}
                     decoded_data = base64.b64decode(encoded_data).decode('utf-8')
                     return json.loads(decoded_data)
         except (IOError, json.JSONDecodeError) as e:
-            logger.error(f"❌ Errore durante il caricamento della cache: {e}. Inizio con una cache vuota.")
+            logger.error(f"❌ Error loading cache: {e}. Starting with an empty cache.")
         return {}
 
     def _get_random_proxy(self):
@@ -59,12 +59,12 @@ class DLHDExtractor:
         return random.choice(self.proxies) if self.proxies else None
 
     async def _get_session(self):
-        """✅ Sessione persistente con cookie jar automatico"""
+        """✅ Persistent session with automatic cookie jar"""
         if self.session is None or self.session.closed:
             timeout = ClientTimeout(total=60, connect=30, sock_read=30)
             proxy = self._get_random_proxy()
             if proxy:
-                logger.info(f"🔗 Utilizzo del proxy {proxy} per la sessione DLHD.")
+                logger.info(f"🔗 Using proxy {proxy} for DLHD session.")
                 connector = ProxyConnector.from_url(proxy, ssl=False)
             else:
                 connector = TCPConnector(
@@ -75,8 +75,8 @@ class DLHDExtractor:
                     force_close=False,
                     use_dns_cache=True
                 )
-                logger.info("ℹ️ Nessun proxy specifico per DLHD, uso connessione diretta.")
-            # ✅ FONDAMENTALE: Cookie jar per mantenere sessione come browser reale
+                logger.info("ℹ️ No specific proxy for DLHD, using direct connection.")
+            # ✅ CRUCIAL: Cookie jar to maintain session like a real browser
             self.session = ClientSession(
                 timeout=timeout,
                 connector=connector,
@@ -86,18 +86,18 @@ class DLHDExtractor:
         return self.session
 
     def _save_cache(self):
-        """Salva lo stato corrente della cache su un file, codificando il contenuto in Base64."""
+        """Saves the current cache state to a file, encoding the content in Base64."""
         try:
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json_data = json.dumps(self._stream_data_cache)
                 encoded_data = base64.b64encode(json_data.encode('utf-8')).decode('utf-8')
                 f.write(encoded_data)
-                logger.info(f"💾 Cache codificata e salvata con successo nel file: {self.cache_file}")
+                logger.info(f"💾 Cache encoded and saved successfully to file: {self.cache_file}")
         except IOError as e:
-            logger.error(f"❌ Errore durante il salvataggio della cache: {e}")
+            logger.error(f"❌ Error saving cache: {e}")
 
     def _get_headers_for_url(self, url: str, base_headers: dict) -> dict:
-        """Applica headers specifici per newkso.ru automaticamente"""
+        """Automatically applies specific headers for newkso.ru"""
         headers = base_headers.copy()
         parsed_url = urlparse(url)
         
@@ -122,50 +122,50 @@ class DLHDExtractor:
         return headers
 
     async def _handle_response_content(self, response: aiohttp.ClientResponse) -> str:
-        """Gestisce la decompressione manuale del corpo della risposta (zstd, gzip, etc.)."""
+        """Handles manual decompression of the response body (zstd, gzip, etc.)."""
         content_encoding = response.headers.get('Content-Encoding')
         raw_body = await response.read()
         
         try:
             if content_encoding == 'zstd':
-                logger.info(f"Rilevata compressione zstd per {response.url}. Decompressione in corso...")
+                logger.info(f"Detected zstd compression for {response.url}. Decompressing...")
                 try:
                     dctx = zstandard.ZstdDecompressor()
-                    # ✅ MODIFICA: Utilizza stream_reader per gestire frame senza dimensione del contenuto.
-                    # Questo risolve l'errore "could not determine content size in frame header".
+                    # ✅ MODIFICATION: Use stream_reader to handle frames without content size.
+                    # This solves the "could not determine content size in frame header" error.
                     with dctx.stream_reader(raw_body) as reader:
                         decompressed_body = reader.read()
                     return decompressed_body.decode(response.charset or 'utf-8')
                 except zstandard.ZstdError as e:
-                    logger.error(f"Errore di decompressione Zstd: {e}. Il contenuto potrebbe essere incompleto o corrotto.")
-                    raise ExtractorError(f"Fallimento decompressione zstd: {e}")
+                    logger.error(f"Zstd decompression error: {e}. Content may be incomplete or corrupted.")
+                    raise ExtractorError(f"zstd decompression failure: {e}")
             elif content_encoding == 'gzip':
-                logger.info(f"Rilevata compressione gzip per {response.url}. Decompressione in corso...")
+                logger.info(f"Detected gzip compression for {response.url}. Decompressing...")
                 decompressed_body = gzip.decompress(raw_body)
                 return decompressed_body.decode(response.charset or 'utf-8')
             elif content_encoding == 'deflate':
-                logger.info(f"Rilevata compressione deflate per {response.url}. Decompressione in corso...")
+                logger.info(f"Detected deflate compression for {response.url}. Decompressing...")
                 decompressed_body = zlib.decompress(raw_body)
                 return decompressed_body.decode(response.charset or 'utf-8')
             else:
-                # Nessuna compressione o compressione non gestita, prova a decodificare direttamente
+                # No compression or unsupported compression, try to decode directly
                 return raw_body.decode(response.charset or 'utf-8')
         except Exception as e:
-            logger.error(f"Errore durante la decompressione/decodifica del contenuto da {response.url}: {e}")
-            raise ExtractorError(f"Fallimento decompressione per {response.url}: {e}")
+            logger.error(f"Error during decompression/decoding of content from {response.url}: {e}")
+            raise ExtractorError(f"Decompression failure for {response.url}: {e}")
 
     async def _make_robust_request(self, url: str, headers: dict = None, retries=3, initial_delay=2):
-        """✅ Richieste con sessione persistente per evitare anti-bot"""
+        """✅ Requests with persistent session to avoid anti-bot"""
         final_headers = self._get_headers_for_url(url, headers or {})
-        # Aggiungiamo zstd agli header accettati per segnalare al server che lo supportiamo
+        # Add zstd to accepted encodings to signal server support
         final_headers['Accept-Encoding'] = 'gzip, deflate, br, zstd'
         
         for attempt in range(retries):
             try:
-                # ✅ IMPORTANTE: Riusa sempre la stessa sessione
+                # ✅ IMPORTANT: Always reuse the same session
                 session = await self._get_session()
                 
-                logger.info(f"Tentativo {attempt + 1}/{retries} per URL: {url}")
+                logger.info(f"Attempt {attempt + 1}/{retries} for URL: {url}")
                 async with session.get(url, headers=final_headers, ssl=False, auto_decompress=False) as response:
                     response.raise_for_status()
                     content = await self._handle_response_content(response)
@@ -191,7 +191,7 @@ class DLHDExtractor:
                         async def json(self):
                             return json.loads(self._text)
                     
-                    logger.info(f"✅ Richiesta riuscita per {url} al tentativo {attempt + 1}")
+                    logger.info(f"✅ Request succeeded for {url} on attempt {attempt + 1}")
                     return MockResponse(content, response.status, response.headers)
                     
             except (
@@ -202,9 +202,9 @@ class DLHDExtractor:
                 OSError,
                 ConnectionResetError,
             ) as e:
-                logger.warning(f"⚠️ Errore connessione tentativo {attempt + 1} per {url}: {str(e)}")
+                logger.warning(f"⚠️ Connection error attempt {attempt + 1} for {url}: {str(e)}")
                 
-                # ✅ Solo in caso di errore critico, chiudi la sessione
+                # ✅ Only in case of critical error, close the session
                 if attempt == retries - 1:
                     if self.session and not self.session.closed:
                         try:
@@ -215,25 +215,25 @@ class DLHDExtractor:
                 
                 if attempt < retries - 1:
                     delay = initial_delay * (2 ** attempt)
-                    logger.info(f"⏳ Aspetto {delay} secondi prima del prossimo tentativo...")
+                    logger.info(f"⏳ Waiting {delay} seconds before next attempt...")
                     await asyncio.sleep(delay)
                 else:
-                    raise ExtractorError(f"Tutti i {retries} tentativi falliti per {url}: {str(e)}")
+                    raise ExtractorError(f"All {retries} attempts failed for {url}: {str(e)}")
                     
             except Exception as e:
-                # Controlla se l'errore è dovuto a zstd e logga un messaggio specifico
+                # Check if error is due to zstd and log a specific message
                 if 'zstd' in str(e).lower():
-                    logger.critical(f"❌ Errore critico con la decompressione zstd. Assicurati che la libreria 'zstandard' sia installata (`pip install zstandard`). Errore: {e}")
+                    logger.critical(f"❌ Critical error with zstd decompression. Make sure the 'zstandard' library is installed (`pip install zstandard`). Error: {e}")
                 else:
-                    logger.error(f"❌ Errore non di rete tentativo {attempt + 1} per {url}: {str(e)}")
+                    logger.error(f"❌ Non-network error attempt {attempt + 1} for {url}: {str(e)}")
                 if attempt == retries - 1:
-                    raise ExtractorError(f"Errore finale per {url}: {str(e)}")
+                    raise ExtractorError(f"Final error for {url}: {str(e)}")
         await asyncio.sleep(initial_delay)
 
     async def extract(self, url: str, force_refresh: bool = False, **kwargs) -> Dict[str, Any]:
-        """Flusso di estrazione principale: risolve il dominio base, trova i player, estrae l'iframe, i parametri di autenticazione e l'URL m3u8 finale."""
+        """Main extraction flow: resolves the base domain, finds players, extracts the iframe, authentication parameters, and final m3u8 URL."""
         async def resolve_base_url(preferred_host: Optional[str] = None) -> str:
-            """Risolve l'URL di base attivo provando una lista di domini noti."""
+            """Resolves the active base URL by trying a list of known domains."""
             if self._cached_base_url and not force_refresh:
                 return self._cached_base_url
             
@@ -242,15 +242,15 @@ class DLHDExtractor:
                 try:
                     resp = await self._make_robust_request(base, retries=1)
                     final_url = str(resp.url)
-                    if not final_url.endswith('/'): final_url += '/' # Assicura lo slash finale
+                    if not final_url.endswith('/'): final_url += '/' # Ensure trailing slash
                     self._cached_base_url = final_url
-                    logger.info(f"✅ Dominio base risolto: {final_url}")
+                    logger.info(f"✅ Base domain resolved: {final_url}")
                     return final_url
                 except Exception as e:
-                    logger.warning(f"⚠️ Tentativo fallito per il dominio base {base}: {e}")
+                    logger.warning(f"⚠️ Failed attempt for base domain {base}: {e}")
             
             fallback = DOMAINS[0]
-            logger.warning(f"Tutti i tentativi di risoluzione del dominio sono falliti, uso il fallback: {fallback}")
+            logger.warning(f"All attempts to resolve the domain failed, using fallback: {fallback}")
             self._cached_base_url = fallback
             return fallback
 
@@ -271,10 +271,10 @@ class DLHDExtractor:
         async def get_stream_data(baseurl: str, initial_url: str, channel_id: str):
             def _extract_auth_params_dynamic(js: str) -> Dict[str, Any]:
                 """
-                Estrae dinamicamente i parametri di autenticazione da JavaScript offuscato.
-                Cerca una stringa Base64 che contiene un oggetto JSON con i parametri.
+                Dynamically extracts authentication parameters from obfuscated JavaScript.
+                Looks for a Base64 string containing a JSON object with the parameters.
                 """
-                # Pattern per trovare una variabile che contiene una lunga stringa Base64
+                # Pattern to find a variable containing a long Base64 string
                 pattern = r'(?:const|var|let)\s+[A-Z0-9_]+\s*=\s*["\']([a-zA-Z0-9+/=]{50,})["\']'
                 matches = re.finditer(pattern, js)
                 
@@ -284,7 +284,7 @@ class DLHDExtractor:
                         json_data = base64.b64decode(b64_data).decode('utf-8')
                         obj_data = json.loads(json_data)
 
-                        # Mappa nomi di chiavi alternativi a quelli standard
+                        # Map alternative key names to standard ones
                         key_mappings = {
                             'auth_host': ['host', 'b_host', 'server', 'domain'],
                             'auth_php': ['script', 'b_script', 'php', 'path'],
@@ -300,11 +300,11 @@ class DLHDExtractor:
                             for name in possible_names:
                                 if name in obj_data:
                                     try:
-                                        # Prova a decodificare se è a sua volta in base64
+                                        # Try to decode if it's also base64
                                         decoded_value = base64.b64decode(obj_data[name]).decode('utf-8')
                                         result[target_key] = decoded_value
                                     except Exception:
-                                        # Altrimenti usa il valore così com'è
+                                        # Otherwise use the value as is
                                         result[target_key] = obj_data[name]
                                     found_key = True
                                     break
@@ -313,13 +313,13 @@ class DLHDExtractor:
                                 break
                         
                         if is_complete:
-                            logger.info(f"✅ Parametri di autenticazione trovati dinamicamente con chiavi: {list(obj_data.keys())}")
+                            logger.info(f"✅ Authentication parameters dynamically found with keys: {list(obj_data.keys())}")
                             return result
                             
                     except Exception:
                         continue
                 
-                logger.warning("Nessun parametro di autenticazione valido trovato con la ricerca dinamica.")
+                logger.warning("No valid authentication parameters found with dynamic search.")
                 return {}
 
             daddy_origin = urlparse(baseurl).scheme + "://" + urlparse(baseurl).netloc
@@ -329,12 +329,12 @@ class DLHDExtractor:
                 'Origin': daddy_origin
             }
 
-            # 1. Richiesta pagina iniziale per trovare i link dei player
+            # 1. Initial page request to find player links
             resp1 = await self._make_robust_request(initial_url, headers=daddylive_headers)
             content1 = await resp1.text()
             player_links = re.findall(r'<button[^>]*data-url="([^"]+)"[^>]*>Player\s*\d+</button>', content1)
             if not player_links:
-                raise ExtractorError("Nessun link player trovato nella pagina.")
+                raise ExtractorError("No player link found in the page.")
 
             last_player_error = None
             iframe_url = None
@@ -354,21 +354,21 @@ class DLHDExtractor:
                         break
                 except Exception as e:
                     last_player_error = e
-                    logger.warning(f"Fallito il processamento del link player {player_url}: {e}")
+                    logger.warning(f"Failed to process player link {player_url}: {e}")
                     continue
 
             if not iframe_url:
                 if last_player_error:
-                    raise ExtractorError(f"Tutti i link dei player sono falliti. Ultimo errore: {last_player_error}")
-                raise ExtractorError("Nessun iframe valido trovato in nessuna pagina player")
+                    raise ExtractorError(f"All player links failed. Last error: {last_player_error}")
+                raise ExtractorError("No valid iframe found in any player page")
 
-            # Salva il contesto dell'iframe per gli header di newkso.ru
+            # Save the iframe context for newkso.ru headers
             self._iframe_context = iframe_url
             resp3 = await self._make_robust_request(iframe_url, headers=daddylive_headers)
             iframe_content = await resp3.text()
 
             try:
-                # Estrai channel key
+                # Extract channel key
                 channel_key = None
                 channel_key_patterns = [
                     r'const\s+CHANNEL_KEY\s*=\s*["\']([^"\']+)["\']',
@@ -383,7 +383,7 @@ class DLHDExtractor:
                         channel_key = match.group(1)
                         break
 
-                # Estrai parametri di autenticazione con la nuova funzione dinamica
+                # Extract authentication parameters with the new dynamic function
                 params = _extract_auth_params_dynamic(iframe_content)
                 auth_host = params.get("auth_host")
                 auth_php = params.get("auth_php")
@@ -391,7 +391,7 @@ class DLHDExtractor:
                 auth_rnd = params.get("auth_rnd")
                 auth_sig = params.get("auth_sig")
 
-                # Verifica che tutti i parametri siano presenti
+                # Check that all parameters are present
                 missing_params = []
                 if not channel_key:
                     missing_params.append('channel_key')
@@ -407,20 +407,20 @@ class DLHDExtractor:
                     missing_params.append('auth_php (script)')
 
                 if missing_params:
-                    raise ExtractorError(f"Parametri mancanti: {', '.join(missing_params)}")
+                    raise ExtractorError(f"Missing parameters: {', '.join(missing_params)}")
 
-                # Procedi con l'autenticazione
+                # Proceed with authentication
                 auth_sig_quoted = quote_plus(auth_sig)
                 if auth_php:
                     normalized_auth_php = auth_php.strip().lstrip('/')
                     if normalized_auth_php == 'a.php':
                         auth_php = 'auth.php' # urljoin gestirà lo slash
                 
-                # Costruisci l'URL di autenticazione
+                # Build the authentication URL
                 base_auth_url = urljoin(auth_host, auth_php)
                 auth_url = f'{base_auth_url}?channel_id={channel_key}&ts={auth_ts}&rnd={auth_rnd}&sig={auth_sig_quoted}'
                 
-                # Fase 4: Auth request con header del contesto iframe
+                # Step 4: Auth request with iframe context headers
                 iframe_origin = f"https://{urlparse(iframe_url).netloc}"
                 auth_headers = daddylive_headers.copy()
                 auth_headers['Referer'] = iframe_url
@@ -428,28 +428,28 @@ class DLHDExtractor:
                 try:
                     await self._make_robust_request(auth_url, headers=auth_headers, retries=1)
                 except Exception as auth_error:
-                    logger.warning(f"Richiesta di autenticazione fallita: {auth_error}.")
+                    logger.warning(f"Authentication request failed: {auth_error}.")
                     if channel_id in self._stream_data_cache:
                         del self._stream_data_cache[channel_id]
-                        logger.info(f"Cache per il canale {channel_id} invalidata; nuovo tentativo in corso.")
+                        logger.info(f"Cache for channel {channel_id} invalidated; retrying.")
                         return await get_stream_data(baseurl, initial_url, channel_id)
-                    raise ExtractorError(f"Autenticazione fallita: {auth_error}")
+                    raise ExtractorError(f"Authentication failed: {auth_error}")
                 
-                # Fase 5: Server lookup
-                server_lookup_path = None # Riscritto per essere più robusto
-                # Cerca dinamicamente il path per il server lookup
+                # Step 5: Server lookup
+                server_lookup_path = None # Rewritten to be more robust
+                # Dynamically search for the path for server lookup
                 lookup_match = re.search(r"fetchWithRetry\(['\"](/server_lookup\.(?:js|php)\?channel_id=)['\"]", iframe_content)
                 if lookup_match:
                     server_lookup_path = lookup_match.group(1)
                 else:
-                    # Fallback a un pattern più generico se il primo fallisce
+                    # Fallback to a more generic pattern if the first fails
                     lookup_match_generic = re.search(r"['\"](/server_lookup\.(?:js|php)\?channel_id=)['\"]", iframe_content)
                     if lookup_match_generic:
                         server_lookup_path = lookup_match_generic.group(1)
 
                 if not server_lookup_path:
-                    logger.error(f"❌ Impossibile estrarre l'URL per il server lookup. Contenuto iframe: {iframe_content[:1000]}")
-                    raise ExtractorError("Impossibile estrarre l'URL per il server lookup")
+                    logger.error(f"❌ Unable to extract the URL for server lookup. Iframe content: {iframe_content[:1000]}")
+                    raise ExtractorError("Unable to extract the URL for server lookup")
                 
                 server_lookup_url = f"https://{urlparse(iframe_url).netloc}{server_lookup_path}{channel_key}"
                 try:
@@ -457,29 +457,29 @@ class DLHDExtractor:
                     server_data = await lookup_resp.json()
                     server_key = server_data.get('server_key')
                     if not server_key:
-                        logger.error(f"Nessun server_key nella risposta: {server_data}")
-                        raise ExtractorError("Fallito l'ottenimento del server key dalla risposta di lookup")
+                        logger.error(f"No server_key in response: {server_data}")
+                        raise ExtractorError("Failed to obtain server key from lookup response")
                 except Exception as lookup_error:
-                    logger.error(f"Richiesta di server lookup fallita: {lookup_error}")
-                    raise ExtractorError(f"Server lookup fallito: {str(lookup_error)}")
+                    logger.error(f"Server lookup request failed: {lookup_error}")
+                    raise ExtractorError(f"Server lookup failed: {str(lookup_error)}")
 
-                logger.info(f"Server key ottenuto: {server_key}")
+                logger.info(f"Server key obtained: {server_key}")
                 
                 referer_raw = f'https://{urlparse(iframe_url).netloc}'
                 
-                # Costruisci URL finale del stream
+                # Build final stream URL
                 if server_key == 'top1/cdn':
-                    clean_m3u8_url = f'https://top1.newkso.ru/top1/cdn/{channel_key}/mono.m3u8' # Dominio noto e funzionante
+                    clean_m3u8_url = f'https://top1.newkso.ru/top1/cdn/{channel_key}/mono.m3u8' # Known working domain
                 elif '/' in server_key:
                     parts = server_key.split('/')
                     domain = parts[0]
                     clean_m3u8_url = f'https://{domain}.newkso.ru/{server_key}/{channel_key}/mono.m3u8'
                 else:
-                    # ✅ CORREZIONE: Usa un dominio di fallback più affidabile se la costruzione dinamica fallisce.
-                    # 'top1' è più recente e stabile di 'top2'.
+                    # ✅ FIX: Use a more reliable fallback domain if dynamic construction fails.
+                    # 'top1' is newer and more stable than 'top2'.
                     clean_m3u8_url = f'https://{server_key}new.newkso.ru/{server_key}/{channel_key}/mono.m3u8'.replace('top2new', 'top1new')
                 
-                # Configura headers finali
+                # Set final headers
                 if "newkso.ru" in clean_m3u8_url:
                     stream_headers = {
                         'User-Agent': daddylive_headers['User-Agent'],
@@ -493,32 +493,32 @@ class DLHDExtractor:
                         'Origin': referer_raw
                     }
                 
-                logger.info(f"🔧 Headers finali per stream: {stream_headers}")
-                logger.info(f"✅ Stream URL finale: {clean_m3u8_url}")
+                logger.info(f"🔧 Final headers for stream: {stream_headers}")
+                logger.info(f"✅ Final stream URL: {clean_m3u8_url}")
                 
                 result_data = {
                     "destination_url": clean_m3u8_url,
                     "request_headers": stream_headers,
                     "mediaflow_endpoint": self.mediaflow_endpoint,
                 }
-                # Salva in cache
+                # Save to cache
                 self._stream_data_cache[channel_id] = result_data
                 self._save_cache()
-                logger.info(f"💾 Dati per il canale ID {channel_id} salvati in cache.")
+                logger.info(f"💾 Data for channel ID {channel_id} saved to cache.")
                 return result_data
                 
             except Exception as param_error:
-                logger.error(f"Errore nell'estrazione parametri: {str(param_error)}")
-                raise ExtractorError(f"Fallimento estrazione parametri: {str(param_error)}")
+                logger.error(f"Error in parameter extraction: {str(param_error)}")
+                raise ExtractorError(f"Parameter extraction failure: {str(param_error)}")
 
         try:
             channel_id = extract_channel_id(url)
             if not channel_id:
                 raise ExtractorError(f"Impossibile estrarre channel ID da {url}")
 
-            # Controlla la cache prima di procedere
+            # Check the cache before proceeding
             if not force_refresh and channel_id in self._stream_data_cache:
-                logger.info(f"✅ Trovati dati in cache per il canale ID: {channel_id}. Verifico la validità...")
+                logger.info(f"✅ Found cached data for channel ID: {channel_id}. Verifying validity...")
                 cached_data = self._stream_data_cache[channel_id]
                 stream_url = cached_data.get("destination_url")
                 stream_headers = cached_data.get("request_headers", {})
@@ -526,64 +526,64 @@ class DLHDExtractor:
                 is_valid = False
                 if stream_url:
                     try:
-                        # Usa una sessione separata per la validazione per non interferire
-                        # con la sessione principale e i suoi cookie.
+                        # Use a separate session for validation to not interfere
+                        # with the main session and its cookies.
                         async with aiohttp.ClientSession(timeout=ClientTimeout(total=10)) as validation_session:
                             async with validation_session.head(stream_url, headers=stream_headers, ssl=False) as response:
-                                # Uso una richiesta HEAD per efficienza, con un timeout breve
+                                # Use a HEAD request for efficiency, with a short timeout
                                 if response.status == 200:
                                     is_valid = True
-                                    logger.info(f"✅ Cache per il canale ID {channel_id} è valida.")
+                                    logger.info(f"✅ Cache for channel ID {channel_id} is valid.")
                                 else:
-                                    logger.warning(f"⚠️ Cache per il canale ID {channel_id} non valida. Status: {response.status}. Procedo con estrazione.")
+                                    logger.warning(f"⚠️ Cache for channel ID {channel_id} is not valid. Status: {response.status}. Proceeding with extraction.")
                     except Exception as e:
-                        logger.warning(f"⚠️ Errore durante la validazione della cache per {channel_id}: {e}. Procedo con estrazione.")
+                        logger.warning(f"⚠️ Error during cache validation for {channel_id}: {e}. Proceeding with extraction.")
                 
                 if not is_valid:
-                    # Rimuovi i dati invalidi dalla cache
+                    # Remove invalid data from cache
                     if channel_id in self._stream_data_cache:
                         del self._stream_data_cache[channel_id]
                     self._save_cache()
-                    logger.info(f"🗑️ Cache invalidata per il canale ID {channel_id}.")
+                    logger.info(f"🗑️ Cache invalidated for channel ID {channel_id}.")
                 else:
-                    # ✅ NUOVO: Esegui una richiesta di "keep-alive" per mantenere la sessione attiva
-                    # Questo utilizza il proxy se configurato, come richiesto.
+                    # ✅ NEW: Perform a "keep-alive" request to keep the session active
+                    # This uses the proxy if configured, as requested.
                     try:
-                        logger.info(f"🔄 Eseguo una richiesta di keep-alive per il canale {channel_id} per mantenere la sessione attiva tramite proxy.")
+                        logger.info(f"🔄 Performing a keep-alive request for channel {channel_id} to keep the session active via proxy.")
                         baseurl = await resolve_base_url()
-                        # Eseguiamo una richiesta leggera alla pagina del canale per aggiornare i cookie di sessione.
-                        # Questo assicura che il proxy venga utilizzato.
+                        # Perform a lightweight request to the channel page to refresh session cookies.
+                        # This ensures the proxy is used.
                         await self._make_robust_request(url, retries=1)
-                        logger.info(f"✅ Sessione per il canale {channel_id} rinfrescata con successo.")
+                        logger.info(f"✅ Session for channel {channel_id} successfully refreshed.")
                     except Exception as e:
-                        logger.warning(f"⚠️ Fallita la richiesta di keep-alive per il canale {channel_id}: {e}. Lo stream potrebbe non funzionare.")
+                        logger.warning(f"⚠️ Keep-alive request failed for channel {channel_id}: {e}. The stream may not work.")
                     
                     return cached_data
 
-            # ✅ NUOVO: Usa un lock per prevenire estrazioni simultanee per lo stesso canale
+            # ✅ NEW: Use a lock to prevent simultaneous extractions for the same channel
             if channel_id not in self._extraction_locks:
                 self._extraction_locks[channel_id] = asyncio.Lock()
             
             lock = self._extraction_locks[channel_id]
             async with lock:
-                # Ricontrolla la cache dopo aver acquisito il lock, un altro processo potrebbe averla già popolata
+                # Recheck the cache after acquiring the lock, another process may have already populated it
                 if channel_id in self._stream_data_cache:
-                    logger.info(f"✅ Dati per il canale {channel_id} trovati in cache dopo aver atteso il lock.")
+                    logger.info(f"✅ Data for channel {channel_id} found in cache after waiting for lock.")
                     return self._stream_data_cache[channel_id]
 
-                # Procedi con l'estrazione
-                logger.info(f"⚙️ Nessuna cache valida per {channel_id}, avvio estrazione completa...")
+                # Proceed with extraction
+                logger.info(f"⚙️ No valid cache for {channel_id}, starting full extraction...")
                 baseurl = await resolve_base_url()
                 return await get_stream_data(baseurl, url, channel_id)
             
         except Exception as e:
-            logger.exception(f"Estrazione DLHD completamente fallita per URL {url}")
-            raise ExtractorError(f"Estrazione DLHD completamente fallita: {str(e)}")
+            logger.exception(f"DLHD extraction completely failed for URL {url}")
+            raise ExtractorError(f"DLHD extraction completely failed: {str(e)}")
 
     async def invalidate_cache_for_url(self, url: str):
         """
-        Invalida la cache per un URL specifico.
-        Questa funzione viene chiamata da app.py quando rileva un errore (es. fallimento chiave AES).
+        Invalidates the cache for a specific URL.
+        This function is called by app.py when it detects an error (e.g. AES key failure).
         """
         def extract_channel_id_internal(u: str) -> Optional[str]:
             patterns = [
@@ -602,10 +602,10 @@ class DLHDExtractor:
         if channel_id and channel_id in self._stream_data_cache:
             del self._stream_data_cache[channel_id]
             self._save_cache()
-            logger.info(f"🗑️ Cache per il canale ID {channel_id} invalidata a causa di un errore esterno (es. chiave AES).")
+            logger.info(f"🗑️ Cache for channel ID {channel_id} invalidated due to an external error (e.g. AES key).")
 
     async def close(self):
-        """Chiude definitivamente la sessione"""
+        """Closes the session permanently"""
         if self.session and not self.session.closed:
             try:
                 await self.session.close()

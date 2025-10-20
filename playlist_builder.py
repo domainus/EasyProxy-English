@@ -8,7 +8,7 @@ from typing import Iterator, List, Dict
 logger = logging.getLogger(__name__)
 
 class PlaylistBuilder:
-    """Builder per playlist M3U con supporto per multiple sorgenti"""
+    """Builder for M3U playlist with support for multiple sources"""
     
     def __init__(self):
         self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"

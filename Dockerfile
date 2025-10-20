@@ -1,28 +1,28 @@
-# Fase 1: Build
-# Usa un'immagine Python ufficiale e leggera come base.
+# Stage 1: Build
+# Use an official lightweight Python image as the base.
 FROM python:3.11-slim
 
-# Imposta la directory di lavoro all'interno del container.
+# Set the working directory inside the container.
 WORKDIR /app
 
-# Copia il file delle dipendenze.
-# Farlo prima del resto del codice sfrutta la cache di Docker se le dipendenze non cambiano.
+# Copy the dependency file.
+# Doing this before the rest of the code takes advantage of Docker's cache if dependencies don't change.
 COPY requirements.txt .
 
-# Installa le dipendenze.
+# Install dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia il resto del codice dell'applicazione nella directory di lavoro.
+# Copy the rest of the application code into the working directory.
 COPY . .
 
-# Metadata dell'immagine OCI (Open Container Initiative) corretti.
+# Correct OCI (Open Container Initiative) image metadata.
 LABEL org.opencontainers.image.title="HLS Proxy Server"
-LABEL org.opencontainers.image.description="Server proxy universale per stream HLS con supporto Vavoo, DLHD e playlist builder"
+LABEL org.opencontainers.image.description="Universal proxy server for HLS streams with support for Vavoo, DLHD, and playlist builder"
 LABEL org.opencontainers.image.version="2.5.0"
-LABEL org.opencontainers.image.source="https://github.com/nzo66/EasyProxy"
+LABEL org.opencontainers.image.source="https://github.com/domainus/EasyProxy-English"
 
-# Esponi la porta su cui l'applicazione è in ascolto.
+# Expose the port the application listens on.
 EXPOSE 7860
 
-# Comando per avviare l'app in produzione con Gunicorn
+# Command to start the app in production with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--workers", "4", "--worker-class", "aiohttp.worker.GunicornWebWorker", "app:app"]
