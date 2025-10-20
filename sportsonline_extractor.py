@@ -9,13 +9,13 @@ import zlib
 import random
 import aiohttp
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
-import zstandard # Importa la libreria zstandard
+import zstandard  # Import the zstandard library
 from aiohttp_proxy import ProxyConnector
 
 logger = logging.getLogger(__name__)
 
 class ExtractorError(Exception):
-    """Eccezione personalizzata per errori di estrazione."""
+    """Custom exception for extraction errors."""
     pass
 
 def unpack(p, a, c, k, e=None, d=None):
@@ -71,7 +71,7 @@ class SportsonlineExtractor:
             timeout = ClientTimeout(total=60, connect=30, sock_read=30)
             proxy = self._get_random_proxy()
             if proxy:
-                logger.info(f"Utilizzo del proxy {proxy} per la sessione Sportsonline.")
+                logger.info(f"Using proxy {proxy} for Sportsonline session.")
                 connector = ProxyConnector.from_url(proxy)
             else:
                 connector = TCPConnector(limit=10, limit_per_host=3)
@@ -86,63 +86,63 @@ class SportsonlineExtractor:
 
     async def _make_robust_request(self, url: str, headers: dict = None, retries=3, initial_delay=2, timeout=15):
         final_headers = headers or self.base_headers
-        # Rimuovi l'header Accept-Encoding per tentare di ricevere una risposta non compressa
+        # Remove the Accept-Encoding header to try receiving an uncompressed response
         request_headers = final_headers.copy()
         request_headers['Accept-Encoding'] = 'gzip, deflate'
 
         for attempt in range(retries):
             try:
                 session = await self._get_session()
-                logger.info(f"Tentativo {attempt + 1}/{retries} per URL: {url}")
-                # Disabilita la decompressione automatica di aiohttp
+                logger.info(f"Attempt {attempt + 1}/{retries} for URL: {url}")
+                # Disable automatic decompression in aiohttp
                 async with session.get(url, headers=request_headers, timeout=timeout, auto_decompress=False) as response:
                     response.raise_for_status()
                     content = await self._handle_response_content(response)
                     return content
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                logger.warning(f"⚠️ Errore connessione tentativo {attempt + 1} per {url}: {str(e)}")
+                logger.warning(f"⚠️ Connection error attempt {attempt + 1} for {url}: {str(e)}")
                 if attempt < retries - 1:
                     delay = initial_delay * (2 ** attempt)
                     await asyncio.sleep(delay)
                 else:
-                    raise ExtractorError(f"Tutti i {retries} tentativi falliti per {url}: {str(e)}")
-            except Exception as e: # Cattura altri potenziali errori durante la decompressione/decodifica
-                logger.exception(f"Errore in _make_robust_request per {url}")
-                raise ExtractorError(f"Errore nella richiesta robusta: {str(e)}")
-        raise ExtractorError(f"Impossibile completare la richiesta per {url}")
+                    raise ExtractorError(f"All {retries} attempts failed for {url}: {str(e)}")
+            except Exception as e:  # Capture other potential errors during decompression/decoding
+                logger.exception(f"Error in _make_robust_request for {url}")
+                raise ExtractorError(f"Error in robust request: {str(e)}")
+        raise ExtractorError(f"Unable to complete request for {url}")
 
     async def _handle_response_content(self, response: aiohttp.ClientResponse) -> str:
-        """Gestisce la decompressione manuale del corpo della risposta."""
+        """Handles manual decompression of the response body."""
         content_encoding = response.headers.get('Content-Encoding')
         raw_body = await response.read()
         
         if content_encoding == 'zstd':
-            logger.info(f"Rilevata compressione zstd per {response.url}. Decompressione manuale in streaming.")
+            logger.info(f"Detected zstd compression for {response.url}. Manual streaming decompression.")
             dctx = zstandard.ZstdDecompressor()
             try:
                 decompressed_body = dctx.decompress(raw_body)
                 return decompressed_body.decode(response.charset or 'utf-8')
             except zstandard.ZstdError as zs_e:
-                logger.error(f"Errore durante la decompressione zstd: {zs_e}")
-                raise ExtractorError(f"Errore decompressione zstd: {zs_e}")
+                logger.error(f"Error during zstd decompression: {zs_e}")
+                raise ExtractorError(f"zstd decompression error: {zs_e}")
         elif content_encoding == 'gzip':
-            logger.info(f"Rilevata compressione gzip per {response.url}. Decompressione manuale.")
+            logger.info(f"Detected gzip compression for {response.url}. Manual decompression.")
             decompressed_body = gzip.decompress(raw_body)
             return decompressed_body.decode(response.charset or 'utf-8')
         elif content_encoding == 'deflate':
-            logger.info(f"Rilevata compressione deflate per {response.url}. Decompressione manuale.")
+            logger.info(f"Detected deflate compression for {response.url}. Manual decompression.")
             decompressed_body = zlib.decompress(raw_body)
             return decompressed_body.decode(response.charset or 'utf-8')
         else:
             return raw_body.decode(response.charset or 'utf-8')
 
     def _detect_packed_blocks(self, html: str) -> list[str]:
-        """Rileva e estrae i blocchi eval packed dall'HTML."""
-        # Pattern robusto che cattura l'intero blocco eval
+        """Detects and extracts eval-packed blocks from the HTML."""
+        # Robust pattern that captures the entire eval block
         pattern = re.compile(r"(eval\(function\(p,a,c,k,e,d\).*?)\s*<\/script>", re.DOTALL)
         raw_matches = pattern.findall(html)
         
-        # Fallback se il pattern precedente non funziona
+        # Fallback if the previous pattern does not work
         if not raw_matches:
             pattern = re.compile(r"(eval\(function\(p,a,c,k,e,.*?\)\))", re.DOTALL)
             raw_matches = pattern.findall(html)
@@ -199,7 +199,7 @@ class SportsonlineExtractor:
             for i in range(len(packed_blocks)):
                 current_idx = (chosen_idx + i) % len(packed_blocks)
                 try:
-                    # Usa la funzione unpack direttamente sul blocco catturato
+                    # Use the unpack function directly on the captured block
                     unpacked_code = unpack(packed_blocks[current_idx])
                     logger.info(f"Successfully unpacked block {current_idx}")
                     
@@ -207,9 +207,9 @@ class SportsonlineExtractor:
                         r'var\s+src\s*=\s*["\']([^"\']+\.m3u8[^"\']*)["\']',
                         r'src\s*=\s*["\']([^"\']+\.m3u8[^"\']*)["\']',
                         r'file\s*:\s*["\']([^"\']+\.m3u8[^"\']*)["\']',
-                        # Pattern più generico per 'source:"...m3u8..."'
+                        # More generic pattern for 'source:"...m3u8..."'
                         r'source\s*:\s*["\'](https?://[^\'"]+?\.m3u8[^\'"]*?)["\']',
-                        # Pattern ancora più generico per qualsiasi URL m3u8 tra virgolette
+                        # Even more generic pattern for any m3u8 URL within quotes
                         r'["\'](https?://[^"\']+\.m3u8[^"\']*)["\']',
                     ]
                     for pattern in patterns:
@@ -250,7 +250,7 @@ def unpack(packed_js):
     This is a Python port of the common Javascript unpacker.
     """
     try:
-        # Estrae i parametri p,a,c,k,e,d dalla stringa packed_js
+        # Extracts the parameters p,a,c,k,e,d from the packed_js string
         match = re.search(r"}\((.*)\)\)", packed_js)
         if not match:
             raise ValueError("Cannot find packed data.")
