@@ -378,30 +378,30 @@
     <div class="container">
         <div class="hero-section">
             <h1 class="hero-title">HLS Proxy Server</h1>
-            <p class="hero-subtitle">Server proxy avanzato per streaming HLS, IPTV e gestione playlist con supporto universale</p>
+            <p class="hero-subtitle">Advanced proxy server for HLS streaming, IPTV, and playlist management with universal support</p>
             <div class="status-indicator">
                 <div class="status-dot"></div>
-                <span>Server Operativo</span>
+                <span>Server Operational</span>
             </div>
         </div>
 
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">🔄</div>
-                <h3 class="feature-title">Proxy Universale</h3>
-                <p class="feature-description">Supporto completo per HLS (.m3u8), playlist M3U, streaming MPD (DASH) e flussi DLHD dinamici con ottimizzazione automatica</p>
+                <h3 class="feature-title">Universal Proxy</h3>
+                <p class="feature-description">Full support for HLS (.m3u8), M3U playlists, MPD (DASH) streaming, and dynamic DLHD streams with automatic optimization</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">🎬</div>
-                <h3 class="feature-title">Estrazione Avanzata</h3>
-                <p class="feature-description">Risoluzione automatica di link Vavoo e DaddyLive HD con bypass delle restrizioni e autenticazione API integrata</p>
+                <h3 class="feature-title">Advanced Extraction</h3>
+                <p class="feature-description">Automatic resolution of Vavoo and DaddyLive HD links with restriction bypass and integrated API authentication</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">📡</div>
                 <h3 class="feature-title">Playlist Builder</h3>
-                <p class="feature-description">Combina multiple playlist in un'unica fonte M3U8 con proxy integrato e compatibilità universale per tutti i player IPTV</p>
+                <p class="feature-description">Combine multiple playlists into a single M3U8 source with integrated proxy and universal compatibility for all IPTV players</p>
             </div>
         </div>
 
@@ -412,15 +412,15 @@
             </a>
             <a href="info" class="cta-button cta-secondary">
                 <span>📋</span>
-                <span>Documentazione</span>
+                <span>Documentation</span>
             </a>
         </div>
     </div>
 
     <script>
-        // Aggiungi effetti di interattività
+        // Add interactivity effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Effetto parallax leggero per le card
+            // Light parallax effect for the cards
             const cards = document.querySelectorAll('.feature-card');
 
             document.addEventListener('mousemove', (e) => {
@@ -435,14 +435,14 @@
                 });
             });
 
-            // Reset transform quando il mouse esce
+            // Reset transform when the mouse leaves
             document.addEventListener('mouseleave', () => {
                 cards.forEach(card => {
                     card.style.transform = '';
                 });
             });
 
-            // Effetto click sulle card
+            // Click effect on the cards
             cards.forEach(card => {
                 card.addEventListener('click', function() {
                     this.style.transform = 'scale(0.95)';
@@ -452,7 +452,7 @@
                 });
             });
 
-            // Animazione del gradiente del titolo al click
+            // Animate the gradient of the title on click
             const title = document.querySelector('.hero-title');
             title.addEventListener('click', () => {
                 title.style.animationDuration = '0.5s';
