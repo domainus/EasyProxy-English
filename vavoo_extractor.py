@@ -13,7 +13,7 @@ class ExtractorError(Exception):
     pass
 
 class VavooExtractor:
-    """Vavoo URL extractor per risolvere link vavoo.to"""
+    """Vavoo URL extractor to resolve vavoo.to links"""
     
     def __init__(self, request_headers: dict, proxies: list = None):
         self.request_headers = request_headers
@@ -25,7 +25,7 @@ class VavooExtractor:
         self.proxies = proxies or []
 
     def _get_random_proxy(self):
-        """Restituisce un proxy casuale dalla lista."""
+        """Returns a random proxy from the list."""
         return random.choice(self.proxies) if self.proxies else None
         
     async def _get_session(self):
@@ -33,7 +33,7 @@ class VavooExtractor:
             timeout = ClientTimeout(total=60, connect=30, sock_read=30)
             proxy = self._get_random_proxy()
             if proxy:
-                logger.info(f"Utilizzo del proxy {proxy} per la sessione Vavoo.")
+                logger.info(f"Using proxy {proxy} for Vavoo session.")
                 connector = ProxyConnector.from_url(proxy)
             else:
                 connector = TCPConnector(
@@ -53,7 +53,7 @@ class VavooExtractor:
         return self.session
 
     async def get_auth_signature(self, retries=3, delay=2) -> Optional[str]:
-        """Ottiene la signature di autenticazione per l'API Vavoo con retry logic"""
+        """Gets the authentication signature for the Vavoo API with retry logic"""
         headers = {
             "user-agent": "okhttp/4.11.0",
             "accept": "application/json", 
@@ -135,20 +135,20 @@ class VavooExtractor:
                     addon_sig = result.get("addonSig")
                     
                     if addon_sig:
-                        logger.info(f"Signature Vavoo ottenuta con successo (tentativo {attempt + 1})")
+                        logger.info(f"Vavoo signature obtained successfully (attempt {attempt + 1})")
                         return addon_sig
                     else:
-                        logger.warning(f"Nessuna addonSig nella risposta API Vavoo (tentativo {attempt + 1})")
+                        logger.warning(f"No addonSig in Vavoo API response (attempt {attempt + 1})")
                         
             except Exception as e:
-                logger.warning(f"Tentativo {attempt + 1} fallito per signature Vavoo: {str(e)}")
+                logger.warning(f"Attempt {attempt + 1} failed for Vavoo signature: {str(e)}")
                 if attempt < retries - 1:
                     await asyncio.sleep(delay * (attempt + 1))
                     if self.session and not self.session.closed:
                         await self.session.close()
                     self.session = None
                 else:
-                    logger.error(f"Tutti i tentativi falliti per signature Vavoo: {str(e)}")
+                    logger.error(f"All attempts failed for Vavoo signature: {str(e)}")
                     return None
         
         return None
@@ -169,7 +169,7 @@ class VavooExtractor:
         }
         
         try:
-            logger.info(f"Tentativo di risoluzione URL Vavoo: {link}")
+            logger.info(f"Attempting to resolve Vavoo URL: {link}")
             session = await self._get_session()
             
             async with session.post(
@@ -182,30 +182,30 @@ class VavooExtractor:
                 
                 if isinstance(result, list) and result and result[0].get("url"):
                     resolved_url = result[0]["url"]
-                    logger.info(f"URL Vavoo risolto con successo: {resolved_url}")
+                    logger.info(f"Vavoo URL resolved successfully: {resolved_url}")
                     return resolved_url
                 elif isinstance(result, dict) and result.get("url"):
                     resolved_url = result["url"]
-                    logger.info(f"URL Vavoo risolto con successo: {resolved_url}")
+                    logger.info(f"Vavoo URL resolved successfully: {resolved_url}")
                     return resolved_url
                 else:
-                    logger.warning(f"Nessun URL trovato nella risposta API Vavoo: {result}")
+                    logger.warning(f"No URL found in Vavoo API response: {result}")
                     return None
         except Exception as e:
-            logger.exception(f"Risoluzione Vavoo fallita per URL {link}: {str(e)}")
+            logger.exception(f"Vavoo resolution failed for URL {link}: {str(e)}")
             return None
 
     async def extract(self, url: str, **kwargs) -> Dict[str, Any]:
         if "vavoo.to" not in url:
-            raise ExtractorError("Non è un URL Vavoo valido")
+            raise ExtractorError("Not a valid Vavoo URL")
 
         signature = await self.get_auth_signature()
         if not signature:
-            raise ExtractorError("Fallito ottenere signature autenticazione Vavoo")
+            raise ExtractorError("Failed to obtain Vavoo authentication signature")
 
         resolved_url = await self._resolve_vavoo_link(url, signature)
         if not resolved_url:
-            raise ExtractorError("Fallito risolvere URL Vavoo")
+            raise ExtractorError("Failed to resolve Vavoo URL")
 
         stream_headers = {
             "user-agent": self.base_headers["user-agent"],

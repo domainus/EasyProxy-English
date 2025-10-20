@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -731,7 +731,7 @@
                 this.updatePlaylistList();
                 this.updateGenerateButton();
 
-                // Animazione di successo
+                // Success animation
                 this.addUrlBtn.classList.add('pulse-success');
                 setTimeout(() => {
                     this.addUrlBtn.classList.remove('pulse-success');
@@ -752,7 +752,7 @@
                     this.playlistList.innerHTML = `
                         <div class="output-placeholder">
                             <div class="output-placeholder-icon">📋</div>
-                            <p>Nessuna playlist aggiunta</p>
+                            <p>No playlist added</p>
                             <small>Enter the playlist URLs and click ➕ to add them</small>
                         </div>
                     `;
@@ -787,7 +787,7 @@
                 this.generateBtn.disabled = true;
 
                 try {
-                    // Simula un breve caricamento per UX
+                    // Short pause for UX
                     await this.simulateLoading();
 
                     const generatedLink = this.createPlaylistLink();
@@ -804,14 +804,14 @@
             }
 
             async simulateLoading() {
-                // Breve pausa per UX
+                // Short pause for UX
                 return new Promise(resolve => {
                     setTimeout(resolve, 800);
                 });
             }
 
             createPlaylistLink() {
-                // Crea il link nel formato /playlist?url=URL1;URL2;URL3
+                // Creates the link in the format /playlist?url=URL1;URL2;URL3
                 const encodedUrls = this.playlists.map(url => encodeURIComponent(url));
                 const urlString = encodedUrls.join(';');
                 const baseUrl = window.location.origin;
@@ -848,13 +848,13 @@
                     await navigator.clipboard.writeText(link);
                     this.showCopyNotification();
 
-                    // Animazione del bottone
+                    // Animate the button
                     this.copyBtn.classList.add('pulse-success');
                     setTimeout(() => {
                         this.copyBtn.classList.remove('pulse-success');
                     }, 600);
                 } catch (err) {
-                    // Fallback per browser che non supportano clipboard API
+                    // Fallback for browsers that do not support the clipboard API
                     this.fallbackCopyTextToClipboard(link);
                 }
             }
@@ -922,12 +922,12 @@
             }
         }
 
-        // Inizializzazione
+        // Initialization
         const playlistBuilder = new PlaylistBuilder();
 
-        // Effetti di interattività aggiuntivi
+        // Additional interactivity effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Effetto hover sulle card
+            // Hover effect on cards
             const cards = document.querySelectorAll('.left-panel, .right-panel');
 
             cards.forEach(card => {
@@ -940,7 +940,7 @@
                 });
             });
 
-            // Animazione dei badge delle feature
+            // Animation of feature badges
             const badges = document.querySelectorAll('.feature-badge');
             badges.forEach((badge, index) => {
                 badge.style.animationDelay = `${index * 0.1}s`;

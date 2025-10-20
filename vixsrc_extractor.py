@@ -12,11 +12,11 @@ from aiohttp_proxy import ProxyConnector
 logger = logging.getLogger(__name__)
 
 class ExtractorError(Exception):
-    """Eccezione personalizzata per errori di estrazione."""
+    """Custom exception for extraction errors."""
     pass
 
 class VixSrcExtractor:
-    """VixSrc URL extractor per risolvere link VixSrc."""
+    """VixSrc URL extractor to resolve VixSrc links."""
     
     def __init__(self, request_headers: dict, proxies: list = None):
         self.request_headers = request_headers
@@ -31,19 +31,19 @@ class VixSrcExtractor:
         self.mediaflow_endpoint = "hls_manifest_proxy"
         self._session_lock = asyncio.Lock()
         self.proxies = proxies or []
-        self.is_vixsrc = True # Flag per identificare questo estrattore
+        self.is_vixsrc = True # Flag to identify this extractor
 
     def _get_random_proxy(self):
-        """Restituisce un proxy casuale dalla lista."""
+        """Returns a random proxy from the list."""
         return random.choice(self.proxies) if self.proxies else None
 
     async def _get_session(self):
-        """Ottiene una sessione HTTP persistente."""
+        """Gets a persistent HTTP session."""
         if self.session is None or self.session.closed:
             timeout = ClientTimeout(total=60, connect=30, sock_read=30)
             proxy = self._get_random_proxy()
             if proxy:
-                logger.info(f"Utilizzo del proxy {proxy} per la sessione VixSrc.")
+                logger.info(f"Using proxy {proxy} for the VixSrc session.")
                 connector = ProxyConnector.from_url(proxy)
             else:
                 connector = TCPConnector(
@@ -63,13 +63,13 @@ class VixSrcExtractor:
         return self.session
 
     async def _make_robust_request(self, url: str, headers: dict = None, retries=3, initial_delay=2):
-        """Effettua richieste HTTP robuste con retry automatico."""
+        """Performs robust HTTP requests with automatic retry."""
         final_headers = headers or {}
         
         for attempt in range(retries):
             try:
                 session = await self._get_session()
-                logger.info(f"Tentativo {attempt + 1}/{retries} per URL: {url}")
+                logger.info(f"Attempt {attempt + 1}/{retries} for URL: {url}")
                 
                 async with session.get(url, headers=final_headers) as response:
                     response.raise_for_status()
@@ -95,7 +95,7 @@ class VixSrcExtractor:
                                     status=self.status
                                 )
                     
-                    logger.info(f"✅ Richiesta riuscita per {url} al tentativo {attempt + 1}")
+                    logger.info(f"✅ Request succeeded for {url} on attempt {attempt + 1}")
                     return MockResponse(content, response.status, response.headers, response.url)
                     
             except (
@@ -106,7 +106,7 @@ class VixSrcExtractor:
                 OSError,
                 ConnectionResetError
             ) as e:
-                logger.warning(f"⚠️ Errore connessione tentativo {attempt + 1} per {url}: {str(e)}")
+                logger.warning(f"⚠️ Connection error attempt {attempt + 1} for {url}: {str(e)}")
                 
                 if attempt == retries - 1:
                     if self.session and not self.session.closed:
@@ -118,48 +118,48 @@ class VixSrcExtractor:
                 
                 if attempt < retries - 1:
                     delay = initial_delay * (2 ** attempt)
-                    logger.info(f"⏳ Aspetto {delay} secondi prima del prossimo tentativo...")
+                    logger.info(f"⏳ Waiting {delay} seconds before the next attempt...")
                     await asyncio.sleep(delay)
                 else:
-                    raise ExtractorError(f"Tutti i {retries} tentativi falliti per {url}: {str(e)}")
+                    raise ExtractorError(f"All {retries} attempts failed for {url}: {str(e)}")
                     
             except Exception as e:
-                logger.error(f"❌ Errore non di rete tentativo {attempt + 1} per {url}: {str(e)}")
+                logger.error(f"❌ Non-network error attempt {attempt + 1} for {url}: {str(e)}")
                 if attempt == retries - 1:
-                    raise ExtractorError(f"Errore finale per {url}: {str(e)}")
+                    raise ExtractorError(f"Error final for {url}: {str(e)}")
                 await asyncio.sleep(initial_delay)
 
     async def _parse_html_simple(self, html_content: str, tag: str, attrs: dict = None):
-        """Parser HTML semplificato senza BeautifulSoup."""
+        """Simple HTML parser without BeautifulSoup."""
         try:
             if tag == "div" and attrs and attrs.get("id") == "app":
-                # Cerca div con id="app"
+                # Searches for div with id="app"
                 pattern = r'<div[^>]*id="app"[^>]*data-page="([^"]*)"[^>]*>'
                 match = re.search(pattern, html_content, re.IGNORECASE)
                 if match:
                     return {"data-page": match.group(1)}
                     
             elif tag == "iframe":
-                # Cerca iframe src
+                # Searches for iframe src
                 pattern = r'<iframe[^>]*src="([^"]*)"[^>]*>'
                 match = re.search(pattern, html_content, re.IGNORECASE)
                 if match:
                     return {"src": match.group(1)}
                     
             elif tag == "script":
-                # Cerca primo script tag nel body
+                # Searches for the first script tag in the body
                 pattern = r'<body[^>]*>.*?<script[^>]*>(.*?)</script>'
                 match = re.search(pattern, html_content, re.DOTALL | re.IGNORECASE)
                 if match:
                     return match.group(1)
                     
         except Exception as e:
-            logger.error(f"Errore parsing HTML: {e}")
+            logger.error(f"HTML parsing error: {e}")
             
         return None
 
     async def version(self, site_url: str) -> str:
-        """Ottiene la versione del sito VixSrc parent."""
+        """Gets the version of the parent VixSrc site."""
         base_url = f"{site_url}/request-a-title"
         
         response = await self._make_robust_request(
@@ -171,31 +171,31 @@ class VixSrcExtractor:
         )
         
         if response.status_code != 200:
-            raise ExtractorError("URL obsoleto")
+            raise ExtractorError("Outdated URL")
         
-        # Parser HTML semplificato
+        # Simple HTML parser
         app_div = await self._parse_html_simple(response.text, "div", {"id": "app"})
         if app_div and app_div.get("data-page"):
             try:
-                # Decodifica HTML entities se necessario
+                # Decode HTML entities if necessary
                 data_page = app_div["data-page"].replace("&quot;", '"')
                 data = json.loads(data_page)
                 return data["version"]
             except (KeyError, json.JSONDecodeError, AttributeError) as e:
-                raise ExtractorError(f"Fallimento parsing versione: {e}")
+                raise ExtractorError(f"Failed to parse version: {e}")
         else:
-            raise ExtractorError("Impossibile trovare dati versione")
+            raise ExtractorError("Unable to find version data")
 
     async def extract(self, url: str, **kwargs) -> Dict[str, Any]:
-        """Estrae URL VixSrc."""
+        """Extracts VixSrc URL."""
         try:
             version = None
             response = None
             
-            # ✅ NUOVO: Gestione per URL di playlist che non richiedono estrazione.
-            # Se l'URL è già un manifest, lo restituisce direttamente.
+            # ✅ NEW: Handling for playlist URLs that do not require extraction.
+            # If the URL is already a manifest, it returns it directly.
             if "vixsrc.to/playlist" in url:
-                logger.info("URL è già un manifest VixSrc, non richiede estrazione.")
+                logger.info("URL is already a VixSrc manifest, extraction not required.")
                 return {
                     "destination_url": url,
                     "request_headers": self.base_headers,
@@ -203,11 +203,11 @@ class VixSrcExtractor:
                 }
 
             if "iframe" in url:
-                # Gestione URL iframe
+                # Handle iframe URLs
                 site_url = url.split("/iframe")[0]
                 version = await self.version(site_url)
                 
-                # Prima richiesta con headers Inertia
+                # First request with Inertia headers
                 response = await self._make_robust_request(
                     url, 
                     headers={
@@ -217,12 +217,12 @@ class VixSrcExtractor:
                     }
                 )
                 
-                # Cerca iframe src
+                # Search for iframe src
                 iframe_data = await self._parse_html_simple(response.text, "iframe")
                 if iframe_data and iframe_data.get("src"):
                     iframe_url = iframe_data["src"]
                     
-                    # Seconda richiesta all'iframe
+                    # Second request to the iframe
                     response = await self._make_robust_request(
                         iframe_url, 
                         headers={
@@ -232,50 +232,50 @@ class VixSrcExtractor:
                         }
                     )
                 else:
-                    raise ExtractorError("Nessun iframe trovato nella risposta")
+                    raise ExtractorError("No iframe found in the response")
                     
             elif "movie" in url or "tv" in url:
-                # Gestione URL diretti movie/tv
+                # Handle direct movie/tv URLs
                 response = await self._make_robust_request(url)
             else:
-                raise ExtractorError("Tipo URL VixSrc non supportato")
+                raise ExtractorError("Unsupported VixSrc URL type")
             
             if response.status_code != 200:
-                raise ExtractorError("Fallimento estrazione componenti URL, richiesta non valida")
+                raise ExtractorError("Failed to extract URL components, invalid request")
             
-            # Estrai script dal body
+            # Extract script from the body
             script_content = await self._parse_html_simple(response.text, "script")
             if not script_content:
-                raise ExtractorError("Nessuno script trovato nel body")
+                raise ExtractorError("No script found in the body")
             
-            # Estrai parametri dallo script JavaScript
+            # Extract parameters from JavaScript script
             try:
                 token_match = re.search(r"'token':\s*'(\w+)'", script_content)
                 expires_match = re.search(r"'expires':\s*'(\d+)'", script_content)
                 server_url_match = re.search(r"url:\s*'([^']+)'", script_content)
                 
                 if not all([token_match, expires_match, server_url_match]):
-                    raise ExtractorError("Parametri mancanti nello script JS")
+                    raise ExtractorError("Missing parameters in JS script")
                 
                 token = token_match.group(1)
                 expires = expires_match.group(1)
                 server_url = server_url_match.group(1)
                 
-                # Costruisci URL finale
+                # Build the final URL
                 if "?b=1" in server_url:
                     final_url = f'{server_url}&token={token}&expires={expires}'
                 else:
                     final_url = f"{server_url}?token={token}&expires={expires}"
                 
-                # Verifica supporto FHD
+                # Check for FHD support
                 if "window.canPlayFHD = true" in script_content:
                     final_url += "&h=1"
                 
-                # Prepara headers finali
+                # Prepare final headers
                 stream_headers = self.base_headers.copy()
                 stream_headers["referer"] = url
                 
-                logger.info(f"✅ URL VixSrc estratto con successo: {final_url}")
+                logger.info(f"✅ VixSrc URL successfully extracted: {final_url}")
                 
                 return {
                     "destination_url": final_url,
@@ -284,14 +284,14 @@ class VixSrcExtractor:
                 }
                 
             except Exception as e:
-                raise ExtractorError(f"Errore parsing script JavaScript: {e}")
+                raise ExtractorError(f"Error parsing JavaScript script: {e}")
                 
         except Exception as e:
-            logger.error(f"❌ Estrazione VixSrc fallita: {str(e)}")
-            raise ExtractorError(f"Estrazione VixSrc completamente fallita: {str(e)}")
+            logger.error(f"❌ VixSrc extraction failed: {str(e)}")
+            raise ExtractorError(f"VixSrc extraction completely failed: {str(e)}")
 
     async def close(self):
-        """Chiude definitivamente la sessione."""
+        """Permanently closes the session."""
         if self.session and not self.session.closed:
             try:
                 await self.session.close()
